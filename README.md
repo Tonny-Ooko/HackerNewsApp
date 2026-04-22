@@ -1,92 +1,78 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 📰 Hacker News Client
+A high-performance **React Native CLI** application built with **TypeScript** and **Zustand**. This project demonstrates clean architectural patterns, robust state persistence, and comprehensive unit testing.
 
-# Getting Started
+---
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 🏛 Architecture & Design Decisions
+* **Feature-Based Structure**: The codebase is modularized by domain (e.g., news, bookmarks) rather than technical types. This ensures better scalability and separation of concerns.
+* **Zustand State Management**: Chosen for its minimal boilerplate and atomic updates. It handles persistence via `AsyncStorage` effortlessly.
+* **Logic Decoupling**: Business logic, such as `sortArticles`, is extracted into pure utility functions, making it independently testable.
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 💡 Section 02: Technical Questions
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Q1 — Bridge vs JSI & The New Architecture
+The legacy Bridge relies on asynchronous JSON serialization, creating a bottleneck. **JSI (JavaScript Interface)** replaces this by allowing the JS engine to hold a direct reference to C++ host objects, enabling synchronous method calls. This removes serialization overhead and solves "jumpy" UI issues in high-frequency events like scrolling.
 
+### Q2 — Diagnosing a Janky FlatList
+1. **Profiling**: Use React DevTools and the native Perf Monitor to track JS/UI thread FPS.
+2. **Fixes**: 
+   - Implement `getItemLayout` for predictable item heights.
+   - Use unique `keyExtractor` IDs (not indexes).
+   - Memoize render items and avoid anonymous functions in `renderItem`.
+   - Adjust `windowSize` and `maxToRenderPerBatch` for memory efficiency.
+
+### Q3 — useCallback and useMemo
+**Benefit**: `useMemo` avoids re-sorting large datasets (like 200+ stories) during unrelated state changes. `useCallback` prevents child component re-renders by stabilizing function references.
+**Trade-off**: Wrapping simple logic adds "memoization overhead"—memory allocation and dependency comparisons can cost more than the re-calculation itself.
+
+### Q4 — State Management Decision: Zustand
+Zustand scales better than Context API (which causes unnecessary consumer re-renders) and has less friction than Redux Toolkit. I would only switch to Redux if the project required complex Sagas or strict architectural guardrails for a very large team.
+
+### Q5 — Offline-First UX Strategy
+I use a multi-layered approach: `@react-native-community/netinfo` for detection and `AsyncStorage` for persistence. We serve "stale" data from the cache while showing an offline banner. The trade-off is "cache consistency," but for news, immediate access is prioritized over real-time comment counts.
+
+---
+
+## 🧪 Testing & Performance
+* **Unit Tests**: Coverage for sorting logic and state transitions.
+* **Optimization**: Leveraged `Promise.all` for parallel metadata fetching.
+* **Command**: `npm test`
+
+---
+
+## 🛠 Setup & Installation
+
+### Step 1: Install & Start Metro
 ```sh
-# Using npm
-npm start
+npm install
+npx react-native start
+Step 2: Build and Run
+Android:
 
-# OR using Yarn
-yarn start
-```
+Bash
 
-## Step 2: Build and run your app
+npx react-native run-android
+iOS:
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+Bash
 
-### Android
+cd ios && pod install && cd ..
+npx react-native run-ios
+⚖️ Trade-offs & Roadmap
+N+1 API Problem: The HN API requires separate calls per item. A production fix would involve a GraphQL gateway.
 
-```sh
-# Using npm
-npm run android
+Manual State vs. React Query: Used useEffect for the MVP; future iterations would use TanStack Query for advanced caching/retries.
 
-# OR using Yarn
-yarn android
-```
 
-### iOS
+### **How to update your GitHub now:**
+Once you save this file, run these commands to push the final professional version:
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
+```bash
+git add README.md
+git commit -m "docs: upgrade README with architecture decisions and technical answers"
+git push origin main
 
 To learn more about React Native, take a look at the following resources:
 
